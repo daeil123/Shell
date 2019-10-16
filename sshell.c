@@ -34,20 +34,20 @@ int getPipe(struct myobj *cmd) {
 }
 
 int addCmd(struct myobj *cmd) {
-	char buf[512];			 		//buffer to hold user input
+	char buf[512];			 	//buffer to hold user input
 	char *temp = malloc(512);		//used to copy in original user input
 	char *temp2 = malloc(512);		//used to copy in original user input
 	cmd->command = malloc(512);		//will hold the full command line in command[0]
-	cmd->argument = malloc(512);	//holds each word in command line 
+	cmd->argument = malloc(512);		//holds each word in command line 
 
-	fgets(buf, sizeof(buf), stdin);			//reads input and stores into buf
+	fgets(buf, sizeof(buf), stdin);		//reads input and stores into buf
 
 	if (!isatty(STDIN_FILENO)) {
         printf("%s", buf);
         fflush(stdout);
   }
 
-	strcpy(temp, buf);		//copying to non tamper with original command
+	strcpy(temp, buf);				//copying to non tamper with original command
 
 	cmd->command[0] = strtok(temp, "\n");		//getting rid of the new line from full command list
 
@@ -146,8 +146,8 @@ void reDirection(struct myobj *cmd) {
 			//opening to write into file at cmd->argument[counter+1]
 			int out = open(cmd->argument[counter+1], O_RDWR|O_CREAT|O_TRUNC, 0644);
 				
-			dup2(out, STDOUT_FILENO);					//connecting stdout to file
-			close(out);							//closing file
+			dup2(out, STDOUT_FILENO);			//connecting stdout to file
+			close(out);					//closing file
 				
 			cmd->argument[counter] = '\0';			//removing ">" and file name from argList
 			break;											
@@ -156,12 +156,12 @@ void reDirection(struct myobj *cmd) {
 		//checks if "<" is in command line 
 		if(strcmp(cmd->argument[counter], "<") == 0) {
 
-			cmd->argument[counter] = cmd->argument[counter+1];			//removing "<" and replacing it with file name
-			cmd->argument[counter+1] = NULL;			//file name moved so it is now null pointer
+			cmd->argument[counter] = cmd->argument[counter+1];		//removing "<" and replacing it with file name
+			cmd->argument[counter+1] = NULL;				//file name moved so it is now null pointer
 
 			int in = open(cmd->argument[counter], O_RDWR);			//opening of file
-			dup2(in, STDIN_FILENO);			//connecting stdin to file
-			close(in);			//closing file
+			dup2(in, STDIN_FILENO);						//connecting stdin to file
+			close(in);							//closing file
 		}
 		counter++;
 	}
@@ -178,7 +178,7 @@ void reDirectionPipe(struct myobj *cmd) {
 
 			int out = open(cmd->argument[counter+1], O_RDWR|O_CREAT|O_TRUNC, 0644);	//opening file to write
 			dup2(out, STDOUT_FILENO);			//connecting stdout to file
-			close(out);			//closing file
+			close(out);					//closing file
 
 			cmd->pipeCmd[counter] = '\0';			//removing ">" and filename from argList
 			break;
@@ -188,12 +188,12 @@ void reDirectionPipe(struct myobj *cmd) {
 		//finding "<"; read from file
 		if(strcmp(cmd->pipeCmd[counter], "<") == 0) {
 
-			cmd->pipeCmd[counter] = cmd->pipeCmd[counter+1];		//replacing "<" with file name
-			cmd->pipeCmd[counter+1] = NULL;		//now file name is null terminator
+			cmd->pipeCmd[counter] = cmd->pipeCmd[counter+1];	//replacing "<" with file name
+			cmd->pipeCmd[counter+1] = NULL;				//now file name is null terminator
 
 			int in = open(cmd->pipeCmd[counter], O_RDWR);		//opening file to read
-			dup2(in, STDIN_FILENO);		//connecting stdin to file
-			close(in);		//closing file
+			dup2(in, STDIN_FILENO);					//connecting stdin to file
+			close(in);						//closing file
 		}
 		counter++;
 	}
@@ -272,7 +272,7 @@ int executeCmd(struct myobj *cmd, int bf, char* pastCommand) {
 			
 			//keeps checking for any background and current process until finds terminated process or error occurs
 			while(1) {
-				pid_t wpid = waitpid(WAIT_ANY, &status, WNOHANG);		//keeps on checking without waiting for child
+				pid_t wpid = waitpid(WAIT_ANY, &status, WNOHANG);	//keeps on checking without waiting for child
 				//there was error
 				//or no more child process
 				if (wpid < 0) {
@@ -319,10 +319,10 @@ int executeCmd(struct myobj *cmd, int bf, char* pastCommand) {
 int executePCmd(struct myobj *cmd, int numPipe) {
 	
 	int totalPipe = numPipe*2;		//total number of space needed for pipe
-	int mypipe[totalPipe];		//pipe array
-	int status[numPipe+1];		//status array for each command
-	pid_t pid;		//proccess id used for fork
-	int num = 0;		//counter for creating pipes
+	int mypipe[totalPipe];			//pipe array
+	int status[numPipe+1];			//status array for each command
+	pid_t pid;				//proccess id used for fork
+	int num = 0;				//counter for creating pipes
 	cmd->pipeCmd = malloc(512);		//parsing each section of command line 
 	
 	//creating pipe
@@ -448,7 +448,7 @@ int checkBackground(struct myobj *cmd) {
 		if(ret != NULL) {						
 			cmd->argument[counter] = strtok(cmd->argument[counter], "&");		//removes "&" 
 			cmd->argument[counter+1] = NULL;		//replace "&" with null terminator
-			background = 1;		//yes background exist
+			background = 1;					//yes background exist
 			break;
 		}
 		counter++;
@@ -529,11 +529,11 @@ int main(int argc, char *argv[]) {
 	while (1) {
 		struct myobj s;						//struct that contains the command and arguments from user
 		display_prompt();					//displays the staring prompt
-		addCmd(&s);							//gets command and arguments from user/stdin
-		int bInt = checkBuiltIn(&s);		// return value 0 = regular command, 1 = pwd, 2 = cd, 3 = exit
-		int numPipe = getPipe(&s);			//return number of pipes
+		addCmd(&s);						//gets command and arguments from user/stdin
+		int bInt = checkBuiltIn(&s);				// return value 0 = regular command, 1 = pwd, 2 = cd, 3 = exit
+		int numPipe = getPipe(&s);				//return number of pipes
 		int errors = redirectionErr(&s, numPipe);		//gets error, 0 for no error
-		int bf = checkBackground(&s);					//check if background process
+		int bf = checkBackground(&s);				//check if background process
 		
 		//first checks if any error in command line
 		//second if pipe exist
